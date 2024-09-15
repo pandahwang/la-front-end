@@ -22,6 +22,28 @@ export async function fetchData() {
     return resData;
 }
 
-export async function createResult(){
-    const response = await fetch('http://localhost:8080/results')
+export async function postData(url = "", data = {}) {
+    const response = await fetch(`http://localhost:8080${url}`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+    })
+    if (response.ok) { console.log("Data posted successfully");
+        console.log(response);
+    } 
+    else { console.log("Failed to post data" + JSON.stringify(data)); }
+    return response;
+  }
+
+export async function getData(url = "") {
+    const response = await fetch(`http://localhost:8080${url}`);
+    const resData = await response.json();
+
+    if(!response.ok){
+        throw new Error('Failed to fetch all user data');
+    }
+
+    return resData;
 }
