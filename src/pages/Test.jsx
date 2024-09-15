@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { QUESTIONS } from "../data/questions";
+import { postData } from "../http";
 
 function Test() {
   const navigate = useNavigate();
@@ -8,9 +9,22 @@ function Test() {
   const [question, setQuestion] = useState(QUESTIONS[0]);
   const [answers, setAnswers] = useState([]);
 
-  const handleClick = (answer) => {
+  async function completeTest() {
+            // /users POST
+            try {
+              const ID = await postData("/users", { answers }).then((res) => res.json());
+              console.log("uuid: ", ID);
+    
+              // /results POST
+              await postData(`/results/${ID}`, { ID });
+            } catch (error) {
+              console.error(error);
+            }
+  } 
 
-    setAnswers((prevAnswers) => [...prevAnswers, { id: 'question' + question.id, answer }]);
+  const handleClick = (answerValue) => {
+
+    setAnswers((prevAnswers) => [...prevAnswers, { id: 'question' + question.id, answer: answerValue }]);
 
     setQuestion((prev) => {
       const nextQuestion = QUESTIONS.find((q) => q.id === prev.id + 1);
@@ -20,25 +34,14 @@ function Test() {
       return prev;
     });
 
-    setClickCount((prev) => {
+    setClickCount( (prev) => {
       const newCount = prev + 1;
       if (newCount === 10) {
         // console.log를 사용하여 네비게이션 시도를 로그로 남깁니다.
         console.log("Attempting to navigate to /result");
 
-        fetch("/result", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ answers }),
-        })
-        .then((response) => {
-          if (response.ok) { console.log("Data posted successfully");
-          } else { console.log("Failed to post data"); }
-        })
-        .catch((error) => { console.error("Error posting data:", error);
-        });
+        completeTest();
+
         navigate("/result");
       }
       return newCount;
@@ -52,6 +55,14 @@ function Test() {
     transition: "width 0.3s ease-in-out",
   };
 
+  const options = [
+    { text: "전혀 아니다", value: 1 },
+    { text: "별로 아니다", value: 2 },
+    { text: "보통이다", value: 3 },
+    { text: "약간 그렇다", value: 4 },
+    { text: "매우 그렇다", value: 5 },
+  ];
+
   return (
     <div className="h-screen w-screen bg-black flex justify-center items-center flex-col">
       <div className="w-[450px] h-auto bg-gray-900 border border-gray-400 flex justify-center items-start flex-col p-8 text-[#F9DA9B]">
@@ -61,19 +72,13 @@ function Test() {
           <div className="h-14 border-b border-gray-500 bg-gray-500 text-white flex items-center p-4 font-bold">
             {question.question}
           </div>
-          {[
-            "전혀 아니다",
-            "별로 아니다",
-            "보통이다",
-            "약간 그렇다",
-            "매우 그렇다",
-          ].map((option, index) => (
+          {options.map((option, index) => (
             <div
               key={index}
-              onClick={()=> handleClick(option)}
+              onClick={()=> handleClick(option.value)}
               className="h-14 cursor-pointer border-b border-gray-500 hover:bg-gray-500 hover:opacity-85 transition-all duration-200 ease-in-out flex items-center p-4"
             >
-              {option}
+              {option.text}
             </div>
           ))}
         </div>

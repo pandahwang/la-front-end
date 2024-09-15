@@ -1,6 +1,7 @@
 import React, { useState, useEffect, CSSProperties } from "react";
 import RadarChart from "../components/RadarChart";
 import { useNavigate } from "react-router-dom";
+import { getData } from "../http";
 
 interface CustomCSSProperties extends CSSProperties {
   "--target-width"?: string;
