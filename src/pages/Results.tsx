@@ -166,6 +166,12 @@ function Results() {
           <p className="mt-2">성향 테스트에 응해주셔서 감사합니다.</p>
           <div className="w-full justify-center flex flex-col items-center">
             <button
+              onClick={() => navigate("/statistics/data")}
+              className="m-2 text-yellow-400 border border-red-700 bg-red-900 hover:bg-red-800 w-40 h-12 "
+            >
+              테스트 결과 모아보기
+            </button>
+            <button
               onClick={() => navigate("/statistics/alluser")}
               className="m-2 text-yellow-400 border border-red-700 bg-red-900 hover:bg-red-800 w-40 h-12 "
             >
