@@ -1,13 +1,14 @@
 import React from "react";
 import CharacterRankingTable from "../components/CharacterRankingTable";
 import { useNavigate } from "react-router-dom";
+import { fetchOuterData } from "../http";
 
 function AllUserStatistics() {
   const navigate = useNavigate();
   return (
     <div className="h-auto w-full bg-black flex justify-center items-center flex-col p-16">
       <div className="w-[450px] bg-gray-900 p-4 border border-gray-400">
-        <CharacterRankingTable />
+        <CharacterRankingTable fnc={fetchOuterData} />
         <div className="w-full text-center">
           <button
             onClick={() => navigate("/result")}
