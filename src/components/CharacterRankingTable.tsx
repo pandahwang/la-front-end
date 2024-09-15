@@ -1,5 +1,4 @@
 import React, { useState, useEffect, CSSProperties } from "react";
-import { fetchAllUser } from "../http";
 
 interface CustomCSSProperties extends CSSProperties {
   "--target-width"?: string;
@@ -11,21 +10,25 @@ interface RankingItem {
   percentage: number;
 }
 
-const CharacterRankingTable = () => {
+interface CharacterRankingTableProps {
+  fnc : () => Promise<RankingItem[]>;
+}
+
+const CharacterRankingTable: React.FC<CharacterRankingTableProps> = ({fnc}) => {
   const [animate, setAnimate] = useState(false);
 
-const [data, setData] = useState<RankingItem[]>([]);
+  const [data, setData] = useState<RankingItem[]>([]);
 
   useEffect(() => {
     setAnimate(true);
   }, []);
   
   useEffect(() => {
-    fetchAllUser().then((resData) => {
+    fnc().then((resData) => {
       
       setData(resData);
   });
-  }, []);
+  }, [fnc]);
 
 
   // const data = [
