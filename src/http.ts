@@ -23,6 +23,7 @@ export async function fetchData() {
 }
 
 export async function postData(url = "", data = {}) {
+    console.log(data);
     const response = await fetch(`http://localhost:8080${url}`, {
       method: "POST",
       headers: {
