@@ -1,26 +1,50 @@
 import React, { useState, useEffect, CSSProperties } from "react";
 import RadarChart from "../components/RadarChart";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { getData } from "../http";
 
 interface CustomCSSProperties extends CSSProperties {
   "--target-width"?: string;
 }
 
+interface ResultItem {
+  jobName: string;
+  value: number;
+  color: string;
+  icon: string;
+}
+
 function Results() {
+  const { id } = useParams(); // URL에서 동적 id를 가져옴
   const [animate, setAnimate] = useState(false);
+  const [data, setData] = useState<ResultItem[]>([]);
 
   useEffect(() => {
     setAnimate(true);
   }, []);
 
-  const data = [
-    { name: "무기", value: 5.76, color: "bg-amber-300", icon: "🔫" },
-    { name: "냉기", value: 5.68, color: "bg-red-500", icon: "❄️" },
-    { name: "정벌", value: 4.53, color: "bg-pink-400", icon: "🏹" },
-    { name: "악마", value: 4.35, color: "bg-purple-400", icon: "😈" },
-    { name: "보조", value: 4.16, color: "bg-pink-300", icon: "🛡️" },
-  ];
+  // const data = [
+  //   { name: "무기", value: 5.76, color: "bg-amber-300", icon: "🔫" },
+  //   { name: "냉기", value: 5.68, color: "bg-red-500", icon: "❄️" },
+  //   { name: "정벌", value: 4.53, color: "bg-pink-400", icon: "🏹" },
+  //   { name: "악마", value: 4.35, color: "bg-purple-400", icon: "😈" },
+  //   { name: "보조", value: 4.16, color: "bg-pink-300", icon: "🛡️" },
+  // ];
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const result = await getData(`/results/${id}`);
+        setData(result); // 가져온 데이터를 setData로 설정
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
+
+    fetchData();
+  }, [id]); // id가 변경될 때마다 useEffect 훅이 다시 실행됨
+
+
 
   const commentData = [
     {
@@ -137,7 +161,7 @@ function Results() {
               </div>
               <div className="flex-1">
                 <div className="flex justify-between items-center mb-1">
-                  <span className="text-white font-medium">{item.name}</span>
+                  <span className="text-white font-medium">{item.jobName}</span>
                   <span className="text-white">{item.value.toFixed(2)}</span>
                 </div>
                 <div className="w-full bg-gray-700 rounded-full h-2.5">
