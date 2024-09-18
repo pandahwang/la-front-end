@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useCallback, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { QUESTIONS } from "../data/questions";
 import { postData } from "../http";
@@ -7,46 +7,71 @@ function Test() {
   const navigate = useNavigate();
   const [clickCount, setClickCount] = useState(0);
   const [question, setQuestion] = useState(QUESTIONS[0]);
-  const [answers, setAnswers] = useState([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [showResultButton, setShowResultButton] = useState(false);
+  const answersRef = useRef({});
+  const [ID, setID] = useState("");
 
-  async function completeTest() {
-            // /users POST
-            try {
-              const ID = await postData("/users", { answers }).then((res) => res.json());
-              console.log("uuid: ", ID);
+  const completeTest = useCallback(async () => {
+    try {
+      const finalAnswers = answersRef.current;
+      console.log("Final Answers:", finalAnswers); // 디버깅을 위한 로그
+
+      const userData = {
+        question1: finalAnswers[1] || 0,
+        question2: finalAnswers[2] || 0,
+        question3: finalAnswers[3] || 0,
+        question4: finalAnswers[4] || 0,
+        question5: finalAnswers[5] || 0,
+        question6: finalAnswers[6] || 0,
+        question7: finalAnswers[7] || 0,
+        question8: finalAnswers[8] || 0,
+        question9: finalAnswers[9] || 0,
+        question10: finalAnswers[10] || 0,
+      };
+
+      console.log("UserData being sent:", userData); // 디버깅을 위한 로그
+
+      const response = await postData("/users", userData);
+      const ID = await response.json();
+      console.log("uuid: ", ID);
+      setID(ID);
+
+      await postData(`/results/${ID}`, { ID });
+      setShowResultButton(true);
+    } catch (error) {
+      console.error("Error in completeTest:", error);
+    }
+  }, []);
+
+  const handleClick = useCallback((questionId, answerValue) => {
+    if (isSubmitting) return;
+
+    answersRef.current = {
+      ...answersRef.current,
+      [questionId]: answerValue
+    };
     
-              // /results POST
-              await postData(`/results/${ID}`, { ID });
-            } catch (error) {
-              console.error(error);
-            }
-  } 
-
-  const handleClick = (answerValue) => {
-
-    setAnswers((prevAnswers) => [...prevAnswers, { id: 'question' + question.id, answer: answerValue }]);
+    console.log("Current Answers:", answersRef.current); // 디버깅을 위한 로그
 
     setQuestion((prev) => {
       const nextQuestion = QUESTIONS.find((q) => q.id === prev.id + 1);
-      if (nextQuestion) {
-        return nextQuestion;
-      }
-      return prev;
+      return nextQuestion || prev;
     });
 
-    setClickCount( (prev) => {
+    setClickCount((prev) => {
       const newCount = prev + 1;
       if (newCount === 10) {
-        // console.log를 사용하여 네비게이션 시도를 로그로 남깁니다.
-        console.log("Attempting to navigate to /result");
-
-        completeTest();
-
-        navigate("/result");
+        setIsSubmitting(true);
+        setIsModalOpen(true);
+        setTimeout(() => {
+          completeTest();
+        }, 1000); // 1초 대기
       }
       return newCount;
     });
-  };
+  }, [completeTest, isSubmitting]);
 
   const dynamicStyle = {
     height: "0.5rem",
@@ -72,20 +97,39 @@ function Test() {
           <div className="h-14 border-b border-gray-500 bg-gray-500 text-white flex items-center p-4 font-bold">
             {question.question}
           </div>
-          {options.map((option, index) => (
-            <div
-              key={index}
-              onClick={()=> handleClick(option.value)}
-              className="h-14 cursor-pointer border-b border-gray-500 hover:bg-gray-500 hover:opacity-85 transition-all duration-200 ease-in-out flex items-center p-4"
-            >
-              {option.text}
+          {isSubmitting ? (
+            <div className="h-14 flex items-center p-4">
+              테스트 결과를 등록중입니다.
             </div>
-          ))}
+          ) : (
+            options.map((option, index) => (
+              <div
+                key={index}
+                onClick={() => handleClick(question.id, option.value)}
+                className="h-14 cursor-pointer border-b border-gray-500 hover:bg-gray-500 hover:opacity-85 transition-all duration-200 ease-in-out flex items-center p-4"
+              >
+                {option.text}
+              </div>
+            ))
+          )}
         </div>
       </div>
       <div className="w-96 h-11 bg-gray-400 flex justify-center items-center">
         AD
       </div>
+      {isModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
+          <div className="bg-gray-400 p-8 rounded-md border-gray-500">
+            {showResultButton ? (
+              <button onClick={() => navigate(`/results/${ID}`)}>
+                결과 보러 가기
+              </button>
+            ) : (
+              <p>테스트 결과를 등록중입니다.</p>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
