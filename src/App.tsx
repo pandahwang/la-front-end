@@ -16,8 +16,8 @@ const App: React.FC = () => {
         {/* "/test" 경로 */}
         <Route path="/test" element={<Test />} />
 
-        {/* "/result" 경로 */}
-        <Route path="/result" element={<Results />} />
+        {/* "/results/:id" 경로 */}
+        <Route path="/results/:id" element={<Results />} />
 
         {/* "/statistics/alluser" 경로 */}
         <Route path="/statistics/alluser" element={<AllUserStatistics />} />
