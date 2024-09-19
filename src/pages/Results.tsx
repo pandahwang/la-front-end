@@ -8,7 +8,7 @@ interface CustomCSSProperties extends CSSProperties {
 }
 
 interface ResultItem {
-  jobName: string;
+  name: string;
   value: number;
   color: string;
   icon: string;
@@ -106,6 +106,7 @@ function Results() {
   const navigate = useNavigate();
 
   const maxValue = Math.max(...data.map((item) => item.value));
+  console.log(`maxValue: ${maxValue}`);
 
   const [currentPage, setCurrentPage] = useState(1);
   const commentsPerPage = 5;
@@ -157,11 +158,11 @@ function Results() {
           {data.map((item, index) => (
             <div key={index} className="flex items-center mb-2">
               <div className="w-8 h-8 rounded-full bg-gray-700 flex items-center justify-center mr-2">
-                <span className="text-xl">{item.icon}</span>
+                <span className="text-xl"><img src={item.icon} alt="classIcon" /></span>
               </div>
               <div className="flex-1">
                 <div className="flex justify-between items-center mb-1">
-                  <span className="text-white font-medium">{item.jobName}</span>
+                  <span className="text-white font-medium">{item.name}</span>
                   <span className="text-white">{item.value.toFixed(2)}</span>
                 </div>
                 <div className="w-full bg-gray-700 rounded-full h-2.5">
