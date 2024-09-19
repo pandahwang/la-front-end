@@ -1,5 +1,7 @@
-import React from "react";
+import { useEffect, useState } from "react";
 import { Radar } from "react-chartjs-2";
+import { useParams } from "react-router-dom";
+import { getData } from "../http";
 import {
   Chart as ChartJS,
   RadialLinearScale,
@@ -10,6 +12,7 @@ import {
   Legend,
 } from "chart.js";
 
+
 ChartJS.register(
   RadialLinearScale,
   PointElement,
@@ -19,13 +22,41 @@ ChartJS.register(
   Legend
 );
 
+interface ResultItem {
+  [key: string]: number;
+}
+
 const RadarChart = () => {
+  const { id } = useParams();
+  const [userData, setUserData] = useState<ResultItem>({});
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const result = await getData(`/users/${id}`);
+        setUserData(result);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
+
+    fetchData();
+  }, [id]);
+
+  const userDataSet = userData ? [
+    userData.question1 + userData.question2,
+    userData.question3 + userData.question4,
+    userData.question5 + userData.question6,
+    userData.question7 + userData.question8,
+    userData.question9 + userData.question10,
+  ] : [];
+
   const data = {
     labels: ["우호성", "신경성", "개방성", "외향성", "성실성"],
     datasets: [
       {
         label: "Dataset 1",
-        data: [65, 59, 90, 81, 56],
+        data: userDataSet,
         backgroundColor: "rgba(255, 99, 132, 0.2)",
         borderColor: "rgba(255, 99, 132, 1)",
         borderWidth: 1,
@@ -38,7 +69,7 @@ const RadarChart = () => {
       r: {
         angleLines: { display: true },
         suggestedMin: 0,
-        suggestedMax: 100,
+        suggestedMax: 10,
       },
     },
   };
