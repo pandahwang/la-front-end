@@ -45,6 +45,6 @@ export async function getData(url = "") {
     if(!response.ok){
         throw new Error('Failed to fetch all user data');
     }
-
+    console.log(resData);
     return resData;
 }
