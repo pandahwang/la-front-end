@@ -11,7 +11,7 @@ function DataStatistics() {
       <CharacterRankingTable fnc={fetchData} />
       <div className="w-full text-center">
         <button
-          onClick={() => navigate("/result")}
+          onClick={() => navigate(-1)}
           className="m-4 text-yellow-400 border border-red-700 bg-red-900 hover:bg-red-800 w-40 h-12 mr-4"
         >
           결과 화면 돌아가기
