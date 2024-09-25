@@ -163,7 +163,7 @@ function Results() {
               <div className="flex-1">
                 <div className="flex justify-between items-center mb-1">
                   <span className="text-white font-medium">{item.name}</span>
-                  <span className="text-white">{item.value.toFixed(2)}</span>
+                  <span className="text-white">{((item.value / maxValue) *5).toFixed(2)}</span>
                 </div>
                 <div className="w-full bg-gray-700 rounded-full h-2.5">
                   <div
