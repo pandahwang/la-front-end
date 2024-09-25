@@ -119,11 +119,22 @@ function Results() {
   //   indexOfLastComment
   // );
 
-  // 총 페이지 수 계산
-  const totalPages = Math.ceil(commentData.length / commentsPerPage);
+  // // 총 페이지 수 계산
+  // const totalPages = Math.ceil(commentData.length / commentsPerPage);
 
   // 페이지 변경 함수
-  const paginate = (pageNumber: number) => setCurrentPage(pageNumber);
+  // const paginate = (pageNumber: number) => setCurrentPage(pageNumber);
+
+  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    console.log(formData);
+    // postData(`/comment/${id}`, formData);
+  }
+
+  function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  }
+  
 
   return (
     <div className="h-auto w-full bg-black flex justify-center items-center flex-row p-16">
@@ -218,7 +229,7 @@ function Results() {
         </h2>
         <div className=" border-t border-yellow-300 mt-4 pt-2 pb-2">
           <form
-            // onSubmit={handleSubmit}
+            onSubmit={handleSubmit}
             className="max-w-md mx-auto mt-4 bg-none"
           >
             <div className="mb-4">
@@ -232,8 +243,8 @@ function Results() {
                 type="text"
                 id="nickname"
                 name="nickname"
-                // value={formData.nickname}
-                // onChange={handleChange}
+                value={formData.nickname}
+                onChange={handleChange}
                 className="w-full px-3 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 required
               />
@@ -246,10 +257,10 @@ function Results() {
                 한마디 남기기
               </label>
               <textarea
-                id="comment"
-                name="comment"
-                // value={formData.comment}
-                // onChange={handleChange}
+                id="content"
+                name="content"
+                value={formData.content}
+                onChange={handleChange}
                 rows={4}
                 className="w-full px-3 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-y"
                 required
