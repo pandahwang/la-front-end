@@ -1,7 +1,7 @@
 import React, { useState, useEffect, CSSProperties } from "react";
 import RadarChart from "../components/RadarChart";
 import { useNavigate, useParams } from "react-router-dom";
-import { getData } from "../http";
+import { getData, postData } from "../http";
 
 interface CustomCSSProperties extends CSSProperties {
   "--target-width"?: string;
@@ -30,9 +30,10 @@ interface Pages {
 }
 
 interface formData {
-  id : string;
+  userID : string;
   nickname: string;
   content: string;
+  password: string;
 }
 
 function Results() {
@@ -47,9 +48,10 @@ function Results() {
     currentPage: 1,
   });
   const [formData, setFormData] = useState<formData>({
-    id: id || "",
+    userID: id || "",
     nickname: "",
     content: "",
+    password: "",
   });
 
 
@@ -126,9 +128,8 @@ function Results() {
   // const paginate = (pageNumber: number) => setCurrentPage(pageNumber);
 
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
     console.log(formData);
-    // postData(`/comment/${id}`, formData);
+    postData(`/comment/${id}`, formData);
   }
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) {
@@ -244,6 +245,23 @@ function Results() {
                 id="nickname"
                 name="nickname"
                 value={formData.nickname}
+                onChange={handleChange}
+                className="w-full px-3 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                required
+              />
+            </div>
+            <div className="mb-4">
+              <label
+                htmlFor="password"
+                className="block text-sm font-bold text-[#F9DA9B] mb-2"
+              >
+                비밀번호
+              </label>
+              <input
+                type="text"
+                id="password"
+                name="password"
+                value={formData.password}
                 onChange={handleChange}
                 className="w-full px-3 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 required
