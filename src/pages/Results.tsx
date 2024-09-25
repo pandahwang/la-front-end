@@ -14,10 +14,48 @@ interface ResultItem {
   icon: string;
 }
 
+interface Comment {
+  nickname: string;
+  topFactorResult: string;
+  createdAt: string;
+  content: string;
+  userID : String;
+}
+
+interface Pages {
+  startPage : number;
+  endPage : number;
+  totalPages : number;
+  currentPage : number;
+}
+
+interface formData {
+  id : string;
+  nickname: string;
+  content: string;
+}
+
 function Results() {
   const { id } = useParams(); // URL에서 동적 id를 가져옴
   const [animate, setAnimate] = useState(false);
   const [data, setData] = useState<ResultItem[]>([]);
+  const [commentData, setCommentData] = useState<Comment[]>([]);
+  const [pages, setPages] = useState<Pages>({
+    startPage: 1,
+    endPage: 1,
+    totalPages: 1,
+    currentPage: 1,
+  });
+  const [formData, setFormData] = useState<formData>({
+    id: id || "",
+    nickname: "",
+    content: "",
+  });
+
+
+  const navigate = useNavigate();
+
+  const maxValue = Math.max(...data.map((item) => item.value));
 
   useEffect(() => {
     setAnimate(true);
@@ -31,6 +69,7 @@ function Results() {
   //   { name: "보조", value: 4.16, color: "bg-pink-300", icon: "🛡️" },
   // ];
 
+  // 테스트 결과 데이터 가져오기
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -45,79 +84,40 @@ function Results() {
   }, [id]); // id가 변경될 때마다 useEffect 훅이 다시 실행됨
 
 
+  // 댓글 데이터 가져오기
 
-  const commentData = [
-    {
-      name: "ㅇㅇ",
-      result: "홀리나이트",
-      createdAt: "2024-09-03 21:58:21",
-      content: "댓글 내용입니다.",
-    },
-    {
-      name: "ㅇㅇ",
-      result: "홀리나이트",
-      createdAt: "2024-09-03 21:58:21",
-      content: "댓글 내용입니다.",
-    },
-    {
-      name: "ㅇㅇ",
-      result: "홀리나이트",
-      createdAt: "2024-09-03 21:58:21",
-      content: "댓글 내용입니다.",
-    },
-    {
-      name: "ㅇㅇ",
-      result: "홀리나이트",
-      createdAt: "2024-09-03 21:58:21",
-      content: "댓글 내용입니다.",
-    },
-    {
-      name: "ㅇㅇ",
-      result: "홀리나이트",
-      createdAt: "2024-09-03 21:58:21",
-      content: "댓글 내용입니다.",
-    },
-    {
-      name: "ㅇㅇ",
-      result: "홀리나이트",
-      createdAt: "2024-09-03 21:58:21",
-      content: "댓글 내용입니다.",
-    },
-    {
-      name: "ㅇㅇ",
-      result: "홀리나이트",
-      createdAt: "2024-09-03 21:58:21",
-      content: "댓글 내용입니다.",
-    },
-    {
-      name: "ㅇㅇ",
-      result: "홀리나이트",
-      createdAt: "2024-09-03 21:58:21",
-      content: "댓글 내용입니다.",
-    },
-    {
-      name: "ㅇㅇ",
-      result: "홀리나이트",
-      createdAt: "2024-09-03 21:58:21",
-      content: "댓글 내용입니다.",
-    },
-  ];
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const result = await getData(`/comment/${pages.currentPage}`);
+        setCommentData(result.comments);
+        setPages(
+          {
+            startPage : result.startPage,
+            endPage : result.endPage,
+            totalPages : result.totalPages,
+            currentPage : result.currentPage
+          });
+          console.log("pages:", result.startPage, result.endPage, result.totalPages, result.currentPage);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
 
-  const navigate = useNavigate();
+    fetchData();
+  }, [pages.currentPage]);
 
-  const maxValue = Math.max(...data.map((item) => item.value));
-  console.log(`maxValue: ${maxValue}`);
+  // 페이지 변경 함수
+  const paginate = (pageNumber: number) => setPages({ ...pages, currentPage: pageNumber });
 
-  const [currentPage, setCurrentPage] = useState(1);
-  const commentsPerPage = 5;
 
-  // 페이지네이션을 위한 댓글 데이터 계산
-  const indexOfLastComment = currentPage * commentsPerPage;
-  const indexOfFirstComment = indexOfLastComment - commentsPerPage;
-  const currentComments = commentData.slice(
-    indexOfFirstComment,
-    indexOfLastComment
-  );
+  // // 페이지네이션을 위한 댓글 데이터 계산
+  // const indexOfLastComment = currentPage * commentsPerPage;
+  // const indexOfFirstComment = indexOfLastComment - commentsPerPage;
+  // const currentComments = commentData.slice(
+  //   indexOfFirstComment,
+  //   indexOfLastComment
+  // );
 
   // 총 페이지 수 계산
   const totalPages = Math.ceil(commentData.length / commentsPerPage);
@@ -265,22 +265,22 @@ function Results() {
         </div>
         <div className="border-t border-yellow-300 mt-4 pt-2 pb-2">
           <div className="h-auto overflow-y-auto">
-            {currentComments.map((comment, index) => (
+            {commentData.map((comment, index) => (
               <div key={index} className="mb-4 bg-gray-800 p-3 rounded-lg">
                 <div className="flex justify-between items-center mb-2">
                   <span className="text-yellow-300 font-bold">
-                    {comment.name}
+                    {comment.nickname}
                   </span>
                   <span className="text-gray-400 text-sm">
                     {comment.createdAt}
                   </span>
                 </div>
                 <p className="text-white mb-2">{comment.content}</p>
-                <p className="text-gray-400 text-sm">결과: {comment.result}</p>
+                <p className="text-gray-400 text-sm">결과: {comment.topFactorResult}</p>
               </div>
             ))}
           </div>
-          {/* 페이지네이션 UI */}
+          {/* 페이지네이션 UI
           <div className="flex justify-center mt-4">
             {Array.from({ length: totalPages }, (_, i) => (
               <button
@@ -288,6 +288,20 @@ function Results() {
                 onClick={() => paginate(i + 1)}
                 className={`mx-1 px-3 py-1 rounded ${
                   currentPage === i + 1
+                    ? "bg-yellow-300 text-gray-900"
+                    : "bg-gray-700 text-white hover:bg-gray-600"
+                }`}
+              >
+                {i + 1}
+              </button>
+            ))} */}
+          <div className="flex justify-center mt-4">
+            {Array.from({ length: pages.totalPages }, (_, i) => (
+              <button
+                key={i}
+                onClick={() => paginate(i + 1)}
+                className={`mx-1 px-3 py-1 rounded ${
+                  pages.currentPage === i + 1
                     ? "bg-yellow-300 text-gray-900"
                     : "bg-gray-700 text-white hover:bg-gray-600"
                 }`}
