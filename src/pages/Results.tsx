@@ -224,7 +224,7 @@ function Results() {
           </div>
         </div>
       </div>
-      <div className="w-[450px] h-[1247px] bg-gray-900 p-4 border border-gray-400">
+      <div className="w-[450px] h-[1311px] bg-gray-900 p-4 border border-gray-400">
         <h2 className="text-xl font-bold mb-4 text-start text-[#F9DA9B]">
           사용자 의견
         </h2>
