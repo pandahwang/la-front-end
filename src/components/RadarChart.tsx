@@ -63,11 +63,16 @@ const RadarChart = () => {
       },
     ],
   };
-
   const options = {
     scales: {
       r: {
-        angleLines: { display: true },
+        angleLines: {
+          display: true,
+          color: "rgba(255, 255, 255, 0.2)", // 배경 기준선(축)의 색상을 흰색으로 변경
+        },
+        grid: {
+          color: "rgba(255, 255, 255, 0.2)", // 원형 그리드 선의 색상을 흰색으로 변경
+        },
         suggestedMin: 0,
         suggestedMax: 10,
       },
@@ -82,7 +87,7 @@ const RadarChart = () => {
       <Radar
         data={data}
         options={options}
-        className="bg-white border shadow-lg"
+        className="bg-[#282C34] border shadow-lg"
       />
     </div>
   );
