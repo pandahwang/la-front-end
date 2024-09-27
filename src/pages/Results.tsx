@@ -1,6 +1,6 @@
 import React, { useState, useEffect, CSSProperties } from "react";
 import RadarChart from "../components/RadarChart";
-import { useNavigate, useParams } from "react-router-dom";
+import { redirect, useNavigate, useParams } from "react-router-dom";
 import { getData, postData } from "../http";
 
 interface CustomCSSProperties extends CSSProperties {
@@ -128,8 +128,16 @@ function Results() {
   // const paginate = (pageNumber: number) => setCurrentPage(pageNumber);
 
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
     console.log(formData);
-    postData(`/comment/${id}`, formData);
+    postData(`/comment/${id}`, formData).then(()=>{
+      window.alert("댓글이 등록되었습니다.");
+    }).catch((error) => {
+      window.alert("댓글 등록을 실패했습니다.");
+      console.error("Error posting data:", error);
+    }).finally(() => {
+      window.location.reload();
+    });
   }
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) {
