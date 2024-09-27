@@ -258,7 +258,7 @@ function Results() {
                 비밀번호
               </label>
               <input
-                type="text"
+                type="password"
                 id="password"
                 name="password"
                 value={formData.password}
