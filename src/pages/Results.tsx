@@ -135,8 +135,13 @@ useEffect(() => {
 
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    postData(`/comment/${id}`, formData).then(() => {
-      setFormData({ userID: id || "", nickname: "", content: "", password: "" });
+    postData(`/comment/${id}`, formData).then(()=>{
+      window.alert("댓글이 등록되었습니다.");
+    }).catch((error) => {
+      window.alert("댓글 등록을 실패했습니다.");
+      console.error("Error posting data:", error);
+    }).finally(() => {
+      window.location.reload();
     });
   }
 
