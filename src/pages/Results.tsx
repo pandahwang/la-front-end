@@ -56,7 +56,7 @@ function Results() {
     password: "",
   });
 
-  const [editComment, setEditComment] = useState<FormData | null>(null); // 수정 상태 관리
+  const [editCommentId, setEditCommentId] = useState<number | null>(null); // 수정 상태 관리
   const navigate = useNavigate();
   const maxValue = Math.max(...data.map((item) => item.value));
 
@@ -134,18 +134,46 @@ useEffect(() => {
   // 페이지 변경 함수
   // const paginate = (pageNumber: number) => setCurrentPage(pageNumber);
 
-  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    postData(`/comment/${id}`, formData).then(()=>{
-      window.alert("댓글이 등록되었습니다.");
-    }).catch((error) => {
-      window.alert("댓글 등록을 실패했습니다.");
-      console.error("Error posting data:", error);
-    }).finally(() => {
-      window.location.reload();
-    });
+    
+    if (editCommentId) {
+      // 수정 모드일 때
+      try {
+        const result = await updateData(`/comment/update/${formData.userID}/${editCommentId}`, {
+          password: formData.password,
+          content: formData.content,
+        });
+  
+        if (result) {
+          setCommentData(
+            commentData.map((comment) =>
+              comment.commentID === editCommentId
+                ? { ...comment, content: formData.content }
+                : comment
+            )
+          );
+          alert("댓글이 성공적으로 수정되었습니다.");
+        } else {
+          alert("댓글 수정에 실패했습니다. 비밀번호를 확인하세요.");
+        }
+      } catch (error) {
+        console.error("댓글 수정 오류:", error);
+        alert("서버와의 통신 중 오류가 발생했습니다.");
+      }
+    } else {
+      // 새로운 댓글 작성 모드일 때
+      try {
+        await postData(`/comment/${id}`, formData);
+        setFormData({ userID: id || "", nickname: "", content: "", password: "" });
+      } catch (error) {
+        console.error("댓글 작성 오류:", error);
+        alert("댓글 작성 중 오류가 발생했습니다.");
+      }
+    }
+    
+    setEditCommentId(null); // 수정 완료 후 수정 모드 해제
   }
-
   function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   }
@@ -176,36 +204,17 @@ useEffect(() => {
     }
   }
 
-  // 댓글 수정 함수
-  async function handleUpdate(userId: string, commentId: number) {
-    const password = prompt("댓글 수정을 위해 비밀번호를 입력하세요:");
-    const content = prompt("새로운 내용을 입력하세요:");
-    
-    if (password && content) {
-      try {
-        const result = await updateData(`/comment/update/${userId}/${commentId}`, {
-          password: password,
-          content: content
-        });
-        
-        if (result) {
-          setCommentData(
-            commentData.map((comment) =>
-              comment.commentID === commentId ? { ...comment, content: content } : comment
-            )
-          );
-          alert("댓글이 성공적으로 수정되었습니다.");
-        } else {
-          alert("댓글 수정에 실패했습니다. 비밀번호를 확인하세요.");
-        }
-      } catch (error) {
-        console.error("댓글 수정 오류:", error);
-        alert("서버와의 통신 중 오류가 발생했습니다.");
-      }
-    } else {
-      alert("수정하려는 내용과 비밀번호를 모두 입력하세요.");
-    }
-  }
+
+  // 수정 버튼 클릭 시 호출되는 함수
+function handleEditClick(comment: Comment) {
+  setFormData({
+    userID: comment.userID,
+    nickname: comment.nickname,
+    content: comment.content,
+    password: "",
+  });
+  setEditCommentId(comment.commentID);
+}
 
   return (
     <div className="container h-[1600px] w-full bg-black flex justify-center items-center flex-row p-16">
@@ -355,11 +364,11 @@ useEffect(() => {
               />
             </div>
             <button
-              type="submit"
-              className="w-full bg-yellow-300 py-2 px-4 text-gray-900 font-bold hover:bg-yellow-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-            >
-              ✏️ 작성
-            </button>
+  type="submit"
+  className="w-full bg-yellow-300 py-2 px-4 text-gray-900 font-bold hover:bg-yellow-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+>
+  {editCommentId ? "수정" : "✏️ 작성"}
+</button>
           </form>
         </div>
         <div className="border-t border-yellow-300 mt-4 pt-2 pb-2">
@@ -376,12 +385,12 @@ useEffect(() => {
 
         {/* 수정 및 삭제 버튼 추가 */}
         <div className="flex justify-end space-x-4 mt-2">
-  <button
-    className="text-blue-500 hover:text-blue-300 px-2 py-1 border border-blue-500 rounded"
-    onClick={() => handleUpdate(comment.userID, comment.commentID)}
-  >
-    수정
-  </button>
+        <button
+  className="text-blue-500 hover:text-blue-300 px-2 py-1 border border-blue-500 rounded"
+  onClick={() => handleEditClick(comment)}
+>
+  수정
+</button>
   <button
     className="text-red-500 hover:text-red-300 px-2 py-1 border border-red-500 rounded"
     onClick={() => {
