@@ -1,7 +1,7 @@
 import React, { useState, useEffect, CSSProperties } from "react";
 import RadarChart from "../components/RadarChart";
-import { redirect, useNavigate, useParams } from "react-router-dom";
-import { getData, postData } from "../http";
+import { useNavigate, useParams } from "react-router-dom";
+import { getData, postData, deleteData, updateData} from "../http";
 
 interface CustomCSSProperties extends CSSProperties {
   "--target-width"?: string;
@@ -19,7 +19,8 @@ interface Comment {
   topFactorResult: string;
   createdAt: string;
   content: string;
-  userID : String;
+  userID : string;
+  commentID: number;  // comment ID 추가
 }
 
 interface Pages {
@@ -54,9 +55,8 @@ function Results() {
     password: "",
   });
 
-
+  const [editComment, setEditComment] = useState<FormData | null>(null); // 수정 상태 관리
   const navigate = useNavigate();
-
   const maxValue = Math.max(...data.map((item) => item.value));
 
   useEffect(() => {
@@ -88,26 +88,32 @@ function Results() {
 
   // 댓글 데이터 가져오기
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const result = await getData(`/comment/${pages.currentPage}`);
-        setCommentData(result.comments);
-        setPages(
-          {
-            startPage : result.startPage,
-            endPage : result.endPage,
-            totalPages : result.totalPages,
-            currentPage : result.currentPage
-          });
-          console.log("pages:", result.startPage, result.endPage, result.totalPages, result.currentPage);
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      }
-    };
+useEffect(() => {
+  const fetchData = async () => {
+    try {
+      const result = await getData(`/comment/${pages.currentPage}`);
+      console.log("Fetched Comment Data:", result); // 데이터를 확인하기 위해 추가
+      const formattedComments = (result?.comments || []).map((comment: any) => ({
+        ...comment,
+        userID: comment.userID || comment.user?.id,
+        commentID: comment.id, // commentID가 올바르게 매핑되는지 확인
+      }));
+      console.log("Formatted Comments:", formattedComments); // 변환된 데이터 확인
+      setCommentData(formattedComments); // commentData 상태를 업데이트
+      setPages({
+        startPage: result.startPage,
+        endPage: result.endPage,
+        totalPages: result.totalPages,
+        currentPage: result.currentPage,
+      });
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
+  };
 
-    fetchData();
-  }, [pages.currentPage]);
+  fetchData();
+}, [pages.currentPage]);
+  
 
   // 페이지 변경 함수
   const paginate = (pageNumber: number) => setPages({ ...pages, currentPage: pageNumber });
@@ -129,14 +135,8 @@ function Results() {
 
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    console.log(formData);
-    postData(`/comment/${id}`, formData).then(()=>{
-      window.alert("댓글이 등록되었습니다.");
-    }).catch((error) => {
-      window.alert("댓글 등록을 실패했습니다.");
-      console.error("Error posting data:", error);
-    }).finally(() => {
-      window.location.reload();
+    postData(`/comment/${id}`, formData).then(() => {
+      setFormData({ userID: id || "", nickname: "", content: "", password: "" });
     });
   }
 
@@ -144,6 +144,62 @@ function Results() {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   }
   
+  // 댓글 삭제 함수
+  async function handleDelete(userId: string | undefined, commentId: number | undefined) {
+    if (!userId || !commentId) {
+      console.error("올바르지 않은 ID 값입니다.", { userId, commentId });
+      alert("올바르지 않은 댓글 ID 또는 사용자 ID입니다.");
+      return;
+    }
+  
+    const password = prompt("댓글 삭제를 위해 비밀번호를 입력하세요:");
+    if (password) {
+      try {
+        const response = await deleteData(`/comment/delete/${userId}/${commentId}`, { password });
+  
+        if (response) {
+          setCommentData(commentData.filter((comment) => comment.commentID !== commentId));
+          alert("댓글이 성공적으로 삭제되었습니다.");
+        } else {
+          alert("댓글 삭제에 실패했습니다. 비밀번호를 확인하세요.");
+        }
+      } catch (error) {
+        console.error("댓글 삭제 오류:", error);
+        alert("서버와의 통신 중 오류가 발생했습니다.");
+      }
+    }
+  }
+
+  // 댓글 수정 함수
+  async function handleUpdate(userId: string, commentId: number) {
+    const password = prompt("댓글 수정을 위해 비밀번호를 입력하세요:");
+    const content = prompt("새로운 내용을 입력하세요:");
+    
+    if (password && content) {
+      try {
+        const result = await updateData(`/comment/update/${userId}/${commentId}`, {
+          password: password,
+          content: content
+        });
+        
+        if (result) {
+          setCommentData(
+            commentData.map((comment) =>
+              comment.commentID === commentId ? { ...comment, content: content } : comment
+            )
+          );
+          alert("댓글이 성공적으로 수정되었습니다.");
+        } else {
+          alert("댓글 수정에 실패했습니다. 비밀번호를 확인하세요.");
+        }
+      } catch (error) {
+        console.error("댓글 수정 오류:", error);
+        alert("서버와의 통신 중 오류가 발생했습니다.");
+      }
+    } else {
+      alert("수정하려는 내용과 비밀번호를 모두 입력하세요.");
+    }
+  }
 
   return (
     <div className="h-auto w-full bg-black flex justify-center items-center flex-row p-16">
@@ -266,7 +322,7 @@ function Results() {
                 비밀번호
               </label>
               <input
-                type="password"
+                type="text"
                 id="password"
                 name="password"
                 value={formData.password}
@@ -301,22 +357,45 @@ function Results() {
           </form>
         </div>
         <div className="border-t border-yellow-300 mt-4 pt-2 pb-2">
-          <div className="h-auto overflow-y-auto">
-            {commentData.map((comment, index) => (
-              <div key={index} className="mb-4 bg-gray-800 p-3 rounded-lg">
-                <div className="flex justify-between items-center mb-2">
-                  <span className="text-yellow-300 font-bold">
-                    {comment.nickname}
-                  </span>
-                  <span className="text-gray-400 text-sm">
-                    {comment.createdAt}
-                  </span>
-                </div>
-                <p className="text-white mb-2">{comment.content}</p>
-                <p className="text-gray-400 text-sm">결과: {comment.topFactorResult}</p>
-              </div>
-            ))}
-          </div>
+        <div className="h-auto overflow-y-auto">
+  {commentData.length > 0 ? (
+    commentData.map((comment, index) => (
+      <div key={index} className="mb-4 bg-gray-800 p-3 rounded-lg">
+        <div className="flex justify-between items-center mb-2">
+          <span className="text-yellow-300 font-bold">{comment.nickname}</span>
+          <span className="text-gray-400 text-sm">{comment.createdAt}</span>
+        </div>
+        <p className="text-white mb-2">{comment.content}</p>
+        <p className="text-gray-400 text-sm">결과: {comment.topFactorResult}</p>
+
+        {/* 수정 및 삭제 버튼 추가 */}
+        <div className="flex justify-end space-x-4 mt-2">
+  <button
+    className="text-blue-500 hover:text-blue-300 px-2 py-1 border border-blue-500 rounded"
+    onClick={() => handleUpdate(comment.userID, comment.commentID)}
+  >
+    수정
+  </button>
+  <button
+    className="text-red-500 hover:text-red-300 px-2 py-1 border border-red-500 rounded"
+    onClick={() => {
+      if (comment.commentID) {
+        handleDelete(comment.userID, comment.commentID);
+      } else {
+        console.error("잘못된 commentID:", comment);  // 로그로 잘못된 데이터 확인
+        alert("올바르지 않은 댓글 ID입니다.");
+      }
+    }}
+  >
+    삭제
+  </button>
+</div>
+      </div>
+    ))
+  ) : (
+    <p className="text-white">댓글이 없습니다.</p>
+  )}
+</div>
           {/* 페이지네이션 UI
           <div className="flex justify-center mt-4">
             {Array.from({ length: totalPages }, (_, i) => (
