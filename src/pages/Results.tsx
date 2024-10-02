@@ -136,73 +136,72 @@ useEffect(() => {
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    
+  
     if (editCommentId) {
       // 수정 모드일 때
       try {
-        const result = await updateData(`/comment/update/${formData.userID}/${editCommentId}`, {
+        const response = await updateData(`/comment/update/${formData.userID}/${editCommentId}`, {
           password: formData.password,
           content: formData.content,
         });
-  
-        if (result) {
-          setCommentData(
-            commentData.map((comment) =>
-              comment.commentID === editCommentId
-                ? { ...comment, content: formData.content }
-                : comment
-            )
-          );
-          alert("댓글이 성공적으로 수정되었습니다.");
+        if (response.ok) {
+          alert("댓글이 성공적으로 수정되었습니다."); // 수정 성공 알림
         } else {
-          alert("댓글 수정에 실패했습니다. 비밀번호를 확인하세요.");
+          const message = await response.text();
+          alert(message); // 서버에서 오는 메시지 그대로 표시
         }
+        window.location.reload(); // 수정 후 새로고침
       } catch (error) {
         console.error("댓글 수정 오류:", error);
-        alert("서버와의 통신 중 오류가 발생했습니다.");
+        alert("댓글 수정 중 오류가 발생했습니다.");
       }
     } else {
       // 새로운 댓글 작성 모드일 때
       try {
-        await postData(`/comment/${id}`, formData);
-        setFormData({ userID: id || "", nickname: "", content: "", password: "" });
+        const response = await postData(`/comment/${id}`, formData);
+        if (response.ok) {
+          alert("댓글 작성이 정상적으로 완료되었습니다."); // 작성 성공 알림
+        } else {
+          const message = await response.text();
+          alert(message); // 서버에서 오는 메시지 그대로 표시
+        }
+        window.location.reload(); // 작성 후 새로고침
       } catch (error) {
         console.error("댓글 작성 오류:", error);
         alert("댓글 작성 중 오류가 발생했습니다.");
       }
     }
-    
+  
     setEditCommentId(null); // 수정 완료 후 수정 모드 해제
   }
+
   function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   }
   
-  // 댓글 삭제 함수
-  async function handleDelete(userId: string | undefined, commentId: number | undefined) {
-    if (!userId || !commentId) {
-      console.error("올바르지 않은 ID 값입니다.", { userId, commentId });
-      alert("올바르지 않은 댓글 ID 또는 사용자 ID입니다.");
-      return;
-    }
+// 댓글 삭제 함수
+async function handleDelete(userId: string | undefined, commentId: number | undefined) {
+  if (!userId || !commentId) {
+    alert("올바르지 않은 댓글 ID 또는 사용자 ID입니다.");
+    return;
+  }
   
-    const password = prompt("댓글 삭제를 위해 비밀번호를 입력하세요:");
-    if (password) {
-      try {
-        const response = await deleteData(`/comment/delete/${userId}/${commentId}`, { password });
-  
-        if (response) {
-          setCommentData(commentData.filter((comment) => comment.commentID !== commentId));
-          alert("댓글이 성공적으로 삭제되었습니다.");
-        } else {
-          alert("댓글 삭제에 실패했습니다. 비밀번호를 확인하세요.");
-        }
-      } catch (error) {
-        console.error("댓글 삭제 오류:", error);
-        alert("서버와의 통신 중 오류가 발생했습니다.");
+  const password = prompt("댓글 삭제를 위해 비밀번호를 입력하세요:");
+  if (password) {
+    try {
+      const response = await deleteData(`/comment/delete/${userId}/${commentId}`, { password });
+      if (response) {
+        alert("댓글이 성공적으로 삭제되었습니다."); // 삭제 성공 알림
+      } else {
+        alert("비밀번호가 올바르지 않습니다. 다시 입력해주세요."); // 실패 시 알림
       }
+      window.location.reload(); // 삭제 후 새로고침
+    } catch (error) {
+      console.error("댓글 삭제 오류:", error);
+      alert("댓글 삭제 중 오류가 발생했습니다.");
     }
   }
+}
 
 
   // 수정 버튼 클릭 시 호출되는 함수
