@@ -89,7 +89,7 @@ function Test() {
   ];
 
   return (
-    <div className="h-screen w-screen bg-black flex justify-center items-center flex-col">
+    <div className="container h-screen w-screen bg-black flex justify-center items-center flex-col">
       <div className="w-[450px] h-auto bg-gray-900 border border-gray-400 flex justify-center items-start flex-col p-8 text-[#F9DA9B]">
         <p className="text-2xl mb-4">성향 테스트</p>
         <div className="mb-2 rounded-md" style={dynamicStyle}></div>
