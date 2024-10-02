@@ -5,6 +5,7 @@ import Test from "./pages/Test";
 import Results from "./pages/Results";
 import AllUserStatistics from "./pages/AllUserStatistics";
 import DataStatistics from "./pages/DataStatistics";
+import './styles.css'; 
 
 const App: React.FC = () => {
   return (
