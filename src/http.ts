@@ -57,8 +57,7 @@ export async function deleteData(url = "", data = {}) {
       },
       body: JSON.stringify(data),
     });
-    if (!response.ok) throw new Error("Failed to delete data");
-    return response.ok;
+    return response;
   }
   
   export async function updateData(url = "", data = {}) {
@@ -69,12 +68,5 @@ export async function deleteData(url = "", data = {}) {
       },
       body: JSON.stringify(data),
     });
-  
-    // HTTP 요청의 응답 상태를 확인하고, 실패 시 오류 메시지 반환
-    if (!response.ok) {
-      const errorText = await response.text(); // 서버에서 반환된 에러 메시지 확인
-      console.error("Update Error:", errorText);
-      throw new Error("Failed to update data");
-    }
-    return response.ok;
+    return response;
   }
