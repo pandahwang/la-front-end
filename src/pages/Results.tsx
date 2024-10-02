@@ -2,7 +2,6 @@ import React, { useState, useEffect, CSSProperties } from "react";
 import RadarChart from "../components/RadarChart";
 import { useNavigate, useParams } from "react-router-dom";
 import { getData, postData, deleteData, updateData} from "../http";
-import '../styles.css'; 
 
 interface CustomCSSProperties extends CSSProperties {
   "--target-width"?: string;
@@ -217,7 +216,7 @@ function handleEditClick(comment: Comment) {
 
   return (
     <div className="container h-[1600px] w-full bg-black flex justify-center items-center flex-row p-16">
-      <div className="w-[450px] h-full bg-gray-900 p-4 border border-gray-400">
+      <div className="result w-[450px] h-full bg-gray-900 p-4 border border-gray-400">
         <RadarChart />
         <div className="text-white border-t border-yellow-300 mt-4 pt-2 pb-2">
           <p className="mb-2">
@@ -302,7 +301,7 @@ function handleEditClick(comment: Comment) {
           </div>
         </div>
       </div>
-      <div className="w-[450px] h-full bg-gray-900 p-4 border border-gray-400">
+      <div className="result w-[450px] h-full bg-gray-900 p-4 border border-gray-400">
         <h2 className="text-xl font-bold mb-4 text-start text-[#F9DA9B]">
           사용자 의견
         </h2>
