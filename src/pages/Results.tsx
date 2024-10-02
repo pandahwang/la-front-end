@@ -1,8 +1,7 @@
 import React, { useState, useEffect, CSSProperties } from "react";
 import RadarChart from "../components/RadarChart";
 import { useNavigate, useParams } from "react-router-dom";
-import { getData, postData, deleteData, updateData} from "../http";
-import '../styles.css'; 
+import { getData, postData } from "../http";
 
 interface CustomCSSProperties extends CSSProperties {
   "--target-width"?: string;
@@ -20,8 +19,7 @@ interface Comment {
   topFactorResult: string;
   createdAt: string;
   content: string;
-  userID : string;
-  commentID: number;  // comment ID 추가
+  userID : String;
 }
 
 interface Pages {
@@ -56,8 +54,9 @@ function Results() {
     password: "",
   });
 
-  const [editCommentId, setEditCommentId] = useState<number | null>(null); // 수정 상태 관리
+
   const navigate = useNavigate();
+
   const maxValue = Math.max(...data.map((item) => item.value));
 
   useEffect(() => {
@@ -89,32 +88,26 @@ function Results() {
 
   // 댓글 데이터 가져오기
 
-useEffect(() => {
-  const fetchData = async () => {
-    try {
-      const result = await getData(`/comment/${pages.currentPage}`);
-      console.log("Fetched Comment Data:", result); // 데이터를 확인하기 위해 추가
-      const formattedComments = (result?.comments || []).map((comment: any) => ({
-        ...comment,
-        userID: comment.userID || comment.user?.id,
-        commentID: comment.id, // commentID가 올바르게 매핑되는지 확인
-      }));
-      console.log("Formatted Comments:", formattedComments); // 변환된 데이터 확인
-      setCommentData(formattedComments); // commentData 상태를 업데이트
-      setPages({
-        startPage: result.startPage,
-        endPage: result.endPage,
-        totalPages: result.totalPages,
-        currentPage: result.currentPage,
-      });
-    } catch (error) {
-      console.error("Error fetching data:", error);
-    }
-  };
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const result = await getData(`/comment/${pages.currentPage}`);
+        setCommentData(result.comments);
+        setPages(
+          {
+            startPage : result.startPage,
+            endPage : result.endPage,
+            totalPages : result.totalPages,
+            currentPage : result.currentPage
+          });
+          console.log("pages:", result.startPage, result.endPage, result.totalPages, result.currentPage);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
 
-  fetchData();
-}, [pages.currentPage]);
-  
+    fetchData();
+  }, [pages.currentPage]);
 
   // 페이지 변경 함수
   const paginate = (pageNumber: number) => setPages({ ...pages, currentPage: pageNumber });
@@ -134,90 +127,19 @@ useEffect(() => {
   // 페이지 변경 함수
   // const paginate = (pageNumber: number) => setCurrentPage(pageNumber);
 
-  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-  
-    if (editCommentId) {
-      // 수정 모드일 때
-      try {
-        const response = await updateData(`/comment/update/${formData.userID}/${editCommentId}`, {
-          password: formData.password,
-          content: formData.content,
-        });
-        if (response.ok) {
-          alert("댓글이 성공적으로 수정되었습니다."); // 수정 성공 알림
-        } else {
-          const message = await response.text();
-          alert(message); // 서버에서 오는 메시지 그대로 표시
-        }
-        window.location.reload(); // 수정 후 새로고침
-      } catch (error) {
-        console.error("댓글 수정 오류:", error);
-        alert("댓글 수정 중 오류가 발생했습니다.");
-      }
-    } else {
-      // 새로운 댓글 작성 모드일 때
-      try {
-        const response = await postData(`/comment/${id}`, formData);
-        if (response.ok) {
-          alert("댓글 작성이 정상적으로 완료되었습니다."); // 작성 성공 알림
-        } else {
-          const message = await response.text();
-          alert(message); // 서버에서 오는 메시지 그대로 표시
-        }
-        window.location.reload(); // 작성 후 새로고침
-      } catch (error) {
-        console.error("댓글 작성 오류:", error);
-        alert("댓글 작성 중 오류가 발생했습니다.");
-      }
-    }
-  
-    setEditCommentId(null); // 수정 완료 후 수정 모드 해제
+  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    console.log(formData);
+    postData(`/comment/${id}`, formData);
   }
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   }
   
-// 댓글 삭제 함수
-async function handleDelete(userId: string | undefined, commentId: number | undefined) {
-  if (!userId || !commentId) {
-    alert("올바르지 않은 댓글 ID 또는 사용자 ID입니다.");
-    return;
-  }
-  
-  const password = prompt("댓글 삭제를 위해 비밀번호를 입력하세요:");
-  if (password) {
-    try {
-      const response = await deleteData(`/comment/delete/${userId}/${commentId}`, { password });
-      if (response) {
-        alert("댓글이 성공적으로 삭제되었습니다."); // 삭제 성공 알림
-      } else {
-        alert("비밀번호가 올바르지 않습니다. 다시 입력해주세요."); // 실패 시 알림
-      }
-      window.location.reload(); // 삭제 후 새로고침
-    } catch (error) {
-      console.error("댓글 삭제 오류:", error);
-      alert("댓글 삭제 중 오류가 발생했습니다.");
-    }
-  }
-}
-
-
-  // 수정 버튼 클릭 시 호출되는 함수
-function handleEditClick(comment: Comment) {
-  setFormData({
-    userID: comment.userID,
-    nickname: comment.nickname,
-    content: comment.content,
-    password: "",
-  });
-  setEditCommentId(comment.commentID);
-}
 
   return (
-    <div className="container h-[1600px] w-full bg-black flex justify-center items-center flex-row p-16">
-      <div className="w-[450px] h-full bg-gray-900 p-4 border border-gray-400">
+    <div className="h-auto w-full bg-black flex justify-center items-center flex-row p-16">
+      <div className="w-[450px] bg-gray-900 p-4 border border-gray-400">
         <RadarChart />
         <div className="text-white border-t border-yellow-300 mt-4 pt-2 pb-2">
           <p className="mb-2">
@@ -302,7 +224,7 @@ function handleEditClick(comment: Comment) {
           </div>
         </div>
       </div>
-      <div className="w-[450px] h-full bg-gray-900 p-4 border border-gray-400">
+      <div className="w-[450px] h-[1311px] bg-gray-900 p-4 border border-gray-400">
         <h2 className="text-xl font-bold mb-4 text-start text-[#F9DA9B]">
           사용자 의견
         </h2>
@@ -336,7 +258,7 @@ function handleEditClick(comment: Comment) {
                 비밀번호
               </label>
               <input
-                type="password"
+                type="text"
                 id="password"
                 name="password"
                 value={formData.password}
@@ -363,53 +285,30 @@ function handleEditClick(comment: Comment) {
               />
             </div>
             <button
-  type="submit"
-  className="w-full bg-yellow-300 py-2 px-4 text-gray-900 font-bold hover:bg-yellow-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
->
-  {editCommentId ? "수정" : "✏️ 작성"}
-</button>
+              type="submit"
+              className="w-full bg-yellow-300 py-2 px-4 text-gray-900 font-bold hover:bg-yellow-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+            >
+              ✏️ 작성
+            </button>
           </form>
         </div>
         <div className="border-t border-yellow-300 mt-4 pt-2 pb-2">
-        <div className="h-auto overflow-y-auto">
-  {commentData.length > 0 ? (
-    commentData.map((comment, index) => (
-      <div key={index} className="mb-4 bg-gray-800 p-3 rounded-lg">
-        <div className="flex justify-between items-center mb-2">
-          <span className="text-yellow-300 font-bold">{comment.nickname}</span>
-          <span className="text-gray-400 text-sm">{comment.createdAt}</span>
-        </div>
-        <p className="text-white mb-2">{comment.content}</p>
-        <p className="text-gray-400 text-sm">결과: {comment.topFactorResult}</p>
-
-        {/* 수정 및 삭제 버튼 추가 */}
-        <div className="flex justify-end space-x-4 mt-2">
-        <button
-  className="text-blue-500 hover:text-blue-300 px-2 py-1 border border-blue-500 rounded"
-  onClick={() => handleEditClick(comment)}
->
-  수정
-</button>
-  <button
-    className="text-red-500 hover:text-red-300 px-2 py-1 border border-red-500 rounded"
-    onClick={() => {
-      if (comment.commentID) {
-        handleDelete(comment.userID, comment.commentID);
-      } else {
-        console.error("잘못된 commentID:", comment);  // 로그로 잘못된 데이터 확인
-        alert("올바르지 않은 댓글 ID입니다.");
-      }
-    }}
-  >
-    삭제
-  </button>
-</div>
-      </div>
-    ))
-  ) : (
-    <p className="text-white">댓글이 없습니다.</p>
-  )}
-</div>
+          <div className="h-auto overflow-y-auto">
+            {commentData.map((comment, index) => (
+              <div key={index} className="mb-4 bg-gray-800 p-3 rounded-lg">
+                <div className="flex justify-between items-center mb-2">
+                  <span className="text-yellow-300 font-bold">
+                    {comment.nickname}
+                  </span>
+                  <span className="text-gray-400 text-sm">
+                    {comment.createdAt}
+                  </span>
+                </div>
+                <p className="text-white mb-2">{comment.content}</p>
+                <p className="text-gray-400 text-sm">결과: {comment.topFactorResult}</p>
+              </div>
+            ))}
+          </div>
           {/* 페이지네이션 UI
           <div className="flex justify-center mt-4">
             {Array.from({ length: totalPages }, (_, i) => (
