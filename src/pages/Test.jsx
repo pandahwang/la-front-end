@@ -2,7 +2,6 @@ import React, { useCallback, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { QUESTIONS } from "../data/questions";
 import { postData } from "../http";
-import '../styles.css'; 
 
 function Test() {
   const navigate = useNavigate();
