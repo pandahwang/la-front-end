@@ -19,7 +19,7 @@ interface Comment {
   topFactorResult: string;
   createdAt: string;
   content: string;
-  userID : String;
+  userId : String;
 }
 
 interface Pages {
@@ -30,7 +30,7 @@ interface Pages {
 }
 
 interface formData {
-  userID : string;
+  userId : string;
   nickname: string;
   content: string;
   password: string;
@@ -48,7 +48,7 @@ function Results() {
     currentPage: 1,
   });
   const [formData, setFormData] = useState<formData>({
-    userID: id || "",
+    userId: id || "",
     nickname: "",
     content: "",
     password: "",
