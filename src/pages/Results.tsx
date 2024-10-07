@@ -409,21 +409,6 @@ function handleEditClick(comment: Comment) {
     <p className="text-white">댓글이 없습니다.</p>
   )}
 </div>
-          {/* 페이지네이션 UI
-          <div className="flex justify-center mt-4">
-            {Array.from({ length: totalPages }, (_, i) => (
-              <button
-                key={i}
-                onClick={() => paginate(i + 1)}
-                className={`mx-1 px-3 py-1 rounded ${
-                  currentPage === i + 1
-                    ? "bg-yellow-300 text-gray-900"
-                    : "bg-gray-700 text-white hover:bg-gray-600"
-                }`}
-              >
-                {i + 1}
-              </button>
-            ))} */}
           <div className="flex justify-center mt-4">
             {Array.from({ length: pages.totalPages }, (_, i) => (
               <button
