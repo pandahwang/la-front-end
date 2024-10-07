@@ -1,6 +1,6 @@
 // 로스트아크 전체 직업 통계 데이터 조회
 export async function fetchOuterData() {
-    const response = await fetch('http://52.79.232.220:8080/statistics/alluser');
+    const response = await fetch('https://52.79.232.220:8080/statistics/alluser');
     const resData = await response.json();
 
     if(!response.ok){
@@ -12,7 +12,7 @@ export async function fetchOuterData() {
 
 // 테스트 대상 전체 직업 통계 데이터 조회
 export async function fetchData() {
-    const response = await fetch('http://52.79.232.220:8080/statistics/data');
+    const response = await fetch('https://52.79.232.220:8080/statistics/data');
     const resData = await response.json();
 
     if(!response.ok){
@@ -24,7 +24,7 @@ export async function fetchData() {
 
 export async function postData(url = "", data = {}) {
     console.log(data);
-    const response = await fetch(`http://52.79.232.220:8080${url}`, {
+    const response = await fetch(`https://52.79.232.220:8080${url}`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -39,7 +39,7 @@ export async function postData(url = "", data = {}) {
   }
 
 export async function getData(url = "") {
-    const response = await fetch(`http://52.79.232.220:8080${url}`);
+    const response = await fetch(`https://52.79.232.220:8080${url}`);
     const resData = await response.json();
 
     if(!response.ok){
@@ -50,7 +50,7 @@ export async function getData(url = "") {
 }
 
 export async function deleteData(url = "", data = {}) {
-    const response = await fetch(`http://52.79.232.220:8080${url}`, {
+    const response = await fetch(`https://52.79.232.220:8080${url}`, {
       method: "DELETE",
       headers: {
         "Content-Type": "application/json",
@@ -61,7 +61,7 @@ export async function deleteData(url = "", data = {}) {
   }
   
   export async function updateData(url = "", data = {}) {
-    const response = await fetch(`http://52.79.232.220:8080${url}`, {
+    const response = await fetch(`https://52.79.232.220:8080${url}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
