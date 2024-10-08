@@ -2,7 +2,6 @@ import React, { useState, useEffect, CSSProperties } from "react";
 import RadarChart from "../components/RadarChart";
 import { useNavigate, useParams } from "react-router-dom";
 import { getData, postData, deleteData, updateData } from "../http";
-import "../styles.css";
 
 interface CustomCSSProperties extends CSSProperties {
   "--target-width"?: string;
@@ -198,7 +197,7 @@ useEffect(() => {
 
   return (
     <div className="container h-[1600px] w-full bg-black flex justify-center items-center flex-row p-16" >
-      <div className="w-[450px] h-full bg-gray-900 p-4 border border-gray-400" >
+      <div className="result w-[450px] h-full bg-gray-900 p-4 border border-gray-400" >
         <RadarChart />
         <div className="text-white border-t border-yellow-300 mt-4 pt-2 pb-2">
           <p className="mb-2">
@@ -287,7 +286,7 @@ useEffect(() => {
           </div>
         </div>
       </div>
-      <div className="w-[450px] h-full bg-gray-900 p-4 border border-gray-400" style={{ minWidth: "380px" }}>
+      <div className="result w-[450px] h-full bg-gray-900 p-4 border border-gray-400" style={{ minWidth: "380px" }}>
         <h2 className="text-xl font-bold mb-4 text-start text-[#F9DA9B]">
           사용자 의견
         </h2>
@@ -405,21 +404,6 @@ useEffect(() => {
             </div>
           ))}
         </div>
-        {/* 페이지네이션 UI
-          <div className="flex justify-center mt-4">
-            {Array.from({ length: totalPages }, (_, i) => (
-              <button
-                key={i}
-                onClick={() => paginate(i + 1)}
-                className={`mx-1 px-3 py-1 rounded ${
-                  currentPage === i + 1
-                    ? "bg-yellow-300 text-gray-900"
-                    : "bg-gray-700 text-white hover:bg-gray-600"
-                }`}
-              >
-                {i + 1}
-              </button>
-            ))} */}
         <div className="flex justify-center mt-4">
           {Array.from({ length: pages.totalPages }, (_, i) => (
             <button
@@ -434,11 +418,6 @@ useEffect(() => {
               {i + 1}
             </button>
           ))}
-        </div>
-      </div>
-      <div className="w-full h-[150px] flex justify-center items-center mt-4">
-        <div className="w-full h-24 bg-gray-400 flex justify-center items-center">
-          AD
         </div>
       </div>
     </div>
