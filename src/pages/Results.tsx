@@ -386,6 +386,54 @@ useEffect(() => {
               <p className="text-white mb-2">{comment.content}</p>{" "}
               <span className="text-gray-400 text-sm">{comment.topFactorResult}</span>
 
+        {/* 수정 및 삭제 버튼 추가 */}
+        <div className="flex justify-end space-x-4 mt-2">
+        <button
+  className="text-blue-500 hover:text-blue-300 px-2 py-1 border border-blue-500 rounded"
+  onClick={() => handleEditClick(comment)}
+>
+  수정
+</button>
+  <button
+    className="text-red-500 hover:text-red-300 px-2 py-1 border border-red-500 rounded"
+    onClick={() => {
+      if (comment.commentID) {
+        handleDelete(comment.userID, comment.commentID);
+      } else {
+        console.error("잘못된 commentID:", comment);  // 로그로 잘못된 데이터 확인
+        alert("올바르지 않은 댓글 ID입니다.");
+      }
+    }}
+  >
+    삭제
+  </button>
+</div>
+      </div>
+    ))
+  ) : (
+    <p className="text-white">댓글이 없습니다.</p>
+  )}
+</div>
+          <div className="flex justify-center mt-4">
+            {Array.from({ length: pages.totalPages }, (_, i) => (
+              <button
+                key={i}
+                onClick={() => paginate(i + 1)}
+                className={`mx-1 px-3 py-1 rounded ${
+                  pages.currentPage === i + 1
+                    ? "bg-yellow-300 text-gray-900"
+                    : "bg-gray-700 text-white hover:bg-gray-600"
+                }`}
+              >
+                {i + 1}
+              </button>
+            ))}
+          </div>
+        </div>
+        <div className="w-full h-[150px] flex justify-center items-center">
+          <div className="w-full h-24 bg-gray-400 flex justify-center items-center">
+            AD
+          </div>
               <div className="flex justify-end space-x-4 mt-2">
                 <button
                   className="text-blue-500 hover:text-blue-300 px-2 py-1 border border-blue-500 rounded"
@@ -441,7 +489,7 @@ useEffect(() => {
           AD
         </div>
       </div>
-    </div>
+  
   );
 }
 
