@@ -39,7 +39,7 @@ interface formData {
 }
 
 function Results() {
-  const { id } = useParams(); // URL에서 동적 id를 가져옴
+  const { id } = useParams(); 
   const [animate, setAnimate] = useState(false);
   const [data, setData] = useState<ResultItem[]>([]);
   const [commentData, setCommentData] = useState<Comment[]>([]);
@@ -57,97 +57,92 @@ function Results() {
   });
 
   const [editCommentId, setEditCommentId] = useState<number | null>(null);
+  const [searchText, setSearchText] = useState<string>("");
   const navigate = useNavigate();
+
   const maxValue = Math.max(...data.map((item) => item.value));
 
   useEffect(() => {
     setAnimate(true);
   }, []);
 
-  // 테스트 결과 데이터 가져오기
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const result = await getData(`/results/${id}`);
-        setData(result);
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      }
-    };
-    fetchData();
-  }, [id]);
 
-  // 댓글 데이터 가져오기
-  useEffect(() => {
-    const fetchComments = async () => {
-      try {
-        const result = await getData(`/comment/${pages.currentPage}`);
-        const formattedComments = (result?.comments || []).map(
-          (comment: any) => ({
-            nickname: comment.nickname,
-            content: comment.content,
-            createdAt: comment.createdAt,
-            userID: comment.userID || comment.user?.id,
-            commentID: comment.id,
-            topFactorResult: comment.topFactorResult,
-          })
-        );
-        setCommentData(formattedComments);
-        setPages({
-          startPage: result.startPage,
-          endPage: result.endPage,
-          totalPages: result.totalPages,
-          currentPage: result.currentPage,
-        });
-      } catch (error) {
-        console.error("Error fetching comments:", error);
-      }
-    };
-    fetchComments();
-  }, [id, pages.currentPage]);
+useEffect(() => {
+  const fetchData = async () => {
+    try {
+      const result = await getData(`/results/${id}`);
+      setData(result);
 
-  // 페이지 변경 함수
-  const paginate = (pageNumber: number) =>
+ 
+      await fetchComments(pages.currentPage, searchText);
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
+  };
+  fetchData();
+  setAnimate(true);
+}, [id, pages.currentPage, searchText]);
+
+
+
+  const fetchComments = async (pageNumber: number, searchText: string) => {
+    try {
+      const searchParam = searchText ? `&searchText=${encodeURIComponent(searchText)}` : "";
+      const result = await getData(`/comment/${pageNumber}?${searchParam}`);
+
+      const formattedComments = (result?.comments || []).map((comment: any) => ({
+        nickname: comment.nickname,
+        content: comment.content,
+        createdAt: comment.createdAt,
+        userID: comment.userID || comment.user?.id,
+        commentID: comment.id,
+        topFactorResult: comment.topFactorResult,
+      }));
+
+      setCommentData(formattedComments);
+      setPages({
+        startPage: result.startPage,
+        endPage: result.endPage,
+        totalPages: result.totalPages,
+        currentPage: result.currentPage,
+      });
+    } catch (error) {
+      console.error("Error fetching comments:", error);
+    }
+  };
+
+  const handleSearch = () => {
+    setPages({ ...pages, currentPage: 1 }); 
+    fetchComments(1, searchText);
+  };
+
+
+  const paginate = (pageNumber: number) => {
     setPages({ ...pages, currentPage: pageNumber });
+    fetchComments(pageNumber, searchText);
+  };
 
-  // 댓글 작성/수정 처리
+ 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     try {
       const commentPayload = {
         nickname: formData.nickname,
-        password: formData.password, // 비밀번호는 password로 저장
-        content: formData.content, // 한마디 남기기는 content로 저장
+        password: formData.password,
+        content: formData.content,
       };
 
+      let response;
       if (editCommentId !== null) {
-        // 댓글 수정
-        await updateData(
-          `/comment/update/${id}/${editCommentId}`,
-          commentPayload
-        );
+        response = await updateData(`/comment/update/${formData.userID}/${editCommentId}`, commentPayload);
         alert("댓글이 성공적으로 수정되었습니다.");
       } else {
-        // 새로운 댓글 작성
-        await postData(`/comment/${id}`, commentPayload);
+        response = await postData(`/comment/${id}`, commentPayload);
         alert("댓글이 성공적으로 작성되었습니다.");
       }
 
-      // 댓글 목록 갱신
-      const result = await getData(`/comment/${pages.currentPage}`);
-      const formattedComments = (result?.comments || []).map(
-        (comment: any) => ({
-          nickname: comment.nickname,
-          content: comment.content,
-          createdAt: comment.createdAt,
-          userID: comment.userID || comment.user?.id,
-          commentID: comment.id,
-          topFactorResult: comment.topFactorResult,
-        })
-      );
-      setCommentData(formattedComments);
-
-      // 폼 초기화 및 수정 모드 해제
+ 
+      await fetchComments(pages.currentPage, searchText);
       setEditCommentId(null);
       setFormData({
         userID: id || "",
@@ -161,22 +156,21 @@ function Results() {
     }
   }
 
-  // 댓글 수정 버튼 클릭 시 댓글 폼에 해당 데이터 로드
+
+
+
   function handleEditClick(comment: Comment) {
     setFormData({
       userID: comment.userID,
       nickname: comment.nickname,
       content: comment.content,
-      password: "", // 비밀번호 초기화
+      password: "",
     });
-    setEditCommentId(comment.commentID); // 현재 수정하려는 댓글 ID 설정
-    window.scrollTo(0, 0); // 폼 위치로 이동
+    setEditCommentId(comment.commentID);
+    window.scrollTo(0, 0);
   }
 
-  async function handleDelete(
-    userId: string | undefined,
-    commentId: number | undefined
-  ) {
+  async function handleDelete(userId: string | undefined, commentId: number | undefined) {
     if (!userId || !commentId) {
       alert("올바르지 않은 댓글 ID 또는 사용자 ID입니다.");
       return;
@@ -184,20 +178,14 @@ function Results() {
 
     const password = prompt("댓글 삭제를 위해 비밀번호를 입력하세요:");
     if (!password || password.trim() === "") {
-      // 비밀번호 입력이 없는 경우 처리
       alert("비밀번호를 입력해주세요.");
       return;
     }
 
     try {
-      const response = await deleteData(
-        `/comment/delete/${userId}/${commentId}`,
-        { password }
-      );
+      const response = await deleteData(`/comment/delete/${userId}/${commentId}`, { password });
       if (response) {
-        setCommentData(
-          commentData.filter((comment) => comment.commentID !== commentId)
-        );
+        setCommentData(commentData.filter((comment) => comment.commentID !== commentId));
         alert("댓글이 성공적으로 삭제되었습니다.");
       } else {
         alert("댓글 삭제에 실패했습니다. 비밀번호를 확인하세요.");
@@ -209,8 +197,8 @@ function Results() {
   }
 
   return (
-    <div className="container h-[1600px] w-full bg-black flex justify-center items-center flex-row p-16">
-      <div className="w-[450px] h-full bg-gray-900 p-4 border border-gray-400">
+    <div className="container h-[1600px] w-full bg-black flex justify-center items-center flex-row p-16" >
+      <div className="w-[450px] h-full bg-gray-900 p-4 border border-gray-400" >
         <RadarChart />
         <div className="text-white border-t border-yellow-300 mt-4 pt-2 pb-2">
           <p className="mb-2">
@@ -299,10 +287,25 @@ function Results() {
           </div>
         </div>
       </div>
-      <div className="w-[450px] h-full bg-gray-900 p-4 border border-gray-400">
+      <div className="w-[450px] h-full bg-gray-900 p-4 border border-gray-400" style={{ minWidth: "380px" }}>
         <h2 className="text-xl font-bold mb-4 text-start text-[#F9DA9B]">
           사용자 의견
         </h2>
+        <div className="mb-4 flex justify-center items-center">
+        <input
+          type="text"
+          value={searchText}
+          onChange={(e) => setSearchText(e.target.value)}
+          placeholder="검색어를 입력하세요..."
+          className="w-3/4 px-3 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+        <button
+          onClick={handleSearch}
+          className="ml-2 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-400"
+        >
+          검색
+        </button>
+      </div>
         <form onSubmit={handleSubmit} className="max-w-md mx-auto mt-4 bg-none">
           <div className="mb-4">
             <label
@@ -369,6 +372,7 @@ function Results() {
           </button>
         </form>
         <div className="border-t border-yellow-300 mt-4 pt-2 pb-2">
+        
           {commentData.map((comment, index) => (
             <div key={index} className="mb-4 bg-gray-800 p-3 rounded-lg">
               <div className="flex justify-between items-center mb-2">
@@ -380,7 +384,8 @@ function Results() {
                 </span>
               </div>
               <p className="text-white mb-2">{comment.content}</p>{" "}
-              {/* content 출력 */}
+              <span className="text-gray-400 text-sm">{comment.topFactorResult}</span>
+
               <div className="flex justify-end space-x-4 mt-2">
                 <button
                   className="text-blue-500 hover:text-blue-300 px-2 py-1 border border-blue-500 rounded"
