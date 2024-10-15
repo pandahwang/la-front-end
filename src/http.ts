@@ -33,7 +33,8 @@ export async function postData(url = "", data = {}) {
   })
   if(!response.ok){
     throw new Error('Failed to fetch data');
-}
+  }
+  return response;
 }
 
 export async function getData(url = "") {
