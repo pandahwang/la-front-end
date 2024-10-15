@@ -108,9 +108,6 @@ function Test() {
           )}
         </div>
       </div>
-      <div className="w-96 h-11 bg-gray-400 flex justify-center items-center">
-        AD
-      </div>
       {isModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
           <div className="bg-gray-400 p-8 rounded-md border-gray-500">
