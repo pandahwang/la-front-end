@@ -31,11 +31,9 @@ export async function postData(url = "", data = {}) {
     },
     body: JSON.stringify(data),
   })
-  if (response.ok) { console.log("Data posted successfully");
-      console.log(response);
-  } 
-  else { console.log("Failed to post data" + JSON.stringify(data)); }
-  return response;
+  if(!response.ok){
+    throw new Error('Failed to fetch data');
+}
 }
 
 export async function getData(url = "") {
@@ -43,9 +41,8 @@ export async function getData(url = "") {
   const resData = await response.json();
 
   if(!response.ok){
-      throw new Error('Failed to fetch all user data');
+      throw new Error('Failed to fetch data');
   }
-  console.log(resData);
   return resData;
 }
 
