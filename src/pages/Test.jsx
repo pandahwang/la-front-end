@@ -16,7 +16,6 @@ function Test() {
   const completeTest = useCallback(async () => {
     try {
       const finalAnswers = answersRef.current;
-      console.log("Final Answers:", finalAnswers); // 디버깅을 위한 로그
 
       const userData = {
         question1: finalAnswers[1] || 0,
@@ -31,11 +30,8 @@ function Test() {
         question10: finalAnswers[10] || 0,
       };
 
-      console.log("UserData being sent:", userData); // 디버깅을 위한 로그
-
       const response = await postData("/users", userData);
       const ID = await response.json();
-      console.log("uuid: ", ID);
       setID(ID);
 
       await postData(`/results/${ID}`, { ID });
@@ -52,8 +48,6 @@ function Test() {
       ...answersRef.current,
       [questionId]: answerValue
     };
-    
-    console.log("Current Answers:", answersRef.current); // 디버깅을 위한 로그
 
     setQuestion((prev) => {
       const nextQuestion = QUESTIONS.find((q) => q.id === prev.id + 1);
@@ -89,7 +83,7 @@ function Test() {
   ];
 
   return (
-    <div className="h-screen w-screen bg-black flex justify-center items-center flex-col">
+    <div className="container h-screen w-screen bg-black flex justify-center items-center flex-col">
       <div className="w-[450px] h-auto bg-gray-900 border border-gray-400 flex justify-center items-start flex-col p-8 text-[#F9DA9B]">
         <p className="text-2xl mb-4">성향 테스트</p>
         <div className="mb-2 rounded-md" style={dynamicStyle}></div>

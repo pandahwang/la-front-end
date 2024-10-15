@@ -5,7 +5,7 @@ import AiChatBtn from "../components/AiChatBtn";
 function Home() {
   const navigate = useNavigate();
   return (
-    <div className="h-screen w-screen bg-black flex justify-center items-center flex-col">
+    <div className="container h-screen w-screen bg-black flex justify-center items-center flex-col">
       <div className="rounded-full overflow-hidden h-14 w-14 mb-8">
         <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSHzT3JpeP-ow7qoHbyMIJis5e8besJMHaeYQ&s" />
       </div>
