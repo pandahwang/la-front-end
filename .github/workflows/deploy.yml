@@ -3,7 +3,7 @@ name: Deploy Frontend To EC2
 on:
   push:
     branches:
-      - dev
+      - master
 
 jobs:
   Deploy:
@@ -18,7 +18,7 @@ jobs:
           script_stop: true
           script: |
             cd /home/ubuntu/la-front-end
-            git pull origin dev
+            git pull origin master
             rm -rf build
             npm install
             npm run build
