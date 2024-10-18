@@ -11,7 +11,7 @@ function Home() {
       </div>
       <div className="w-[450px] h-72 bg-gray-900 border border-gray-400 mb-4 flex justify-center items-center flex-col p-4 text-[#F9DA9B]">
         <p className="text-[#956C3B] font-bold text-3xl mb-4">
-          성향 테스트 + 직업 선택
+          성향 테스트 + 직업 추천
         </p>
         <p className="mb-4 text-xl">Big 5 테스트란?</p>
         <p className="text-sm text-center">
@@ -31,22 +31,14 @@ function Home() {
             alt="Image"
           />
         </div>
-        <p>로스트아크 초보자입니까?</p>
+        <p>아래 버튼을 눌러 테스트를 시작하세요!</p>
         <div>
-          {/* 첫 번째 버튼: "예" */}
+          {/* 테스트 시작 버튼 */}
           <button
             onClick={() => navigate("/test")}
             className="m-2 text-yellow-400 border border-red-700 bg-red-900 hover:bg-red-800 w-40 h-12 mr-4"
           >
-            예
-          </button>
-
-          {/* 두 번째 버튼: "아니요" */}
-          <button
-            onClick={() => navigate("/test")}
-            className="m-2 text-yellow-400 border border-yellow-700 bg-black hover:bg-gray-800 w-40 h-12"
-          >
-            아니요
+            시작
           </button>
         </div>
       </div>
